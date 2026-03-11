@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediCare Clinic – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --teal:       #0d9488;
+      --teal-light: #ccfbf1;
+      --teal-mid:   #5eead4;
+      --orange:     #f97316;
+      --orange-lt:  #fff7ed;
+      --bg:         #f0f4f8;
+      --sidebar-bg: #ffffff;
+      --card:       #ffffff;
+      --border:     #e2e8f0;
+      --text:       #1e293b;
+      --muted:      #64748b;
+      --active-nav: #f0fdf4;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md:  0 4px 16px rgba(0,0,0,.08);
+      --radius:     14px;
+      --radius-sm:  9px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── Outer shell ─────────────────────────────── */
+    .shell {
+      display: flex;
+      width: 100%;
+      max-width: 1260px;
+      min-height: 780px;
+      background: var(--bg);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      overflow: hidden;
+      animation: fadeUp .55s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(20px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── Sidebar ──────────────────────────────────── */
+    .sidebar {
+      width: 230px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 0 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 22px 32px;
+    }
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--teal), #0f766e);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px; color: #fff; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(13,148,136,.35);
+    }
+    .logo-text { line-height: 1.1; }
+    .logo-text strong { font-size: 14px; font-weight: 700; color: var(--text); }
+    .logo-text span   { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+    nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 12px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .18s, color .18s;
+      text-decoration: none;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text); }
+    .nav-item.active {
+      background: var(--active-nav);
+      color: var(--teal);
+      border-left: 3px solid var(--teal);
+      padding-left: 11px;
+    }
+    .nav-item svg { flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 14px 12px 0;
+      border-top: 1px solid var(--border);
+    }
+    .nav-item.logout { color: #ef4444; }
+    .nav-item.logout:hover { background: #fef2f2; }
+
+    /* ── Main ─────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 28px 32px 20px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--teal-light);
+      background: linear-gradient(135deg, var(--teal-mid), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .header-text h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px; color: var(--text);
+    }
+    .header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .header-text p span { color: var(--border); margin: 0 6px; }
+
+    /* Content grid */
+    .content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 0;
+      overflow: auto;
+    }
+
+    .left-col  { padding: 24px 20px 24px 32px; display: flex; flex-direction: column; gap: 20px; }
+    .right-col { padding: 24px 24px 24px 4px;  display: flex; flex-direction: column; gap: 16px; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      padding: 20px 22px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .section-title {
+      font-size: 15px; font-weight: 700;
+      margin-bottom: 14px; color: var(--text);
+    }
+
+    /* Appointment card */
+    .appt-card { position: relative; overflow: hidden; }
+    .appt-card::before {
+      content: '';
+      position: absolute; top:0; left:0; right:0; height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--teal-mid));
+    }
+    .appt-inner { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .doctor-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #a7f3d0, #34d399);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #065f46; font-weight: 700; flex-shrink: 0;
+    }
+    .appt-inner h3 { font-size: 15px; font-weight: 600; }
+    .appt-inner p  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .appt-time { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .appt-location { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+    .appt-actions { display: flex; align-items: center; gap: 14px; }
+    .btn-join {
+      padding: 9px 22px;
+      background: linear-gradient(135deg, var(--orange), #ea580c);
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(249,115,22,.3);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-join:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(249,115,22,.4); }
+    .btn-reschedule {
+      font-size: 13px; font-weight: 500; color: var(--teal);
+      background: none; border: none; cursor: pointer;
+    }
+    .btn-reschedule:hover { text-decoration: underline; }
+
+    /* Health dashboard */
+    .health-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .time-select {
+      font-size: 12px; color: var(--muted); background: var(--bg);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 4px 10px; cursor: pointer; font-family: inherit;
+    }
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chart-box { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; }
+    .chart-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .chart-label span:first-child { font-size: 13px; font-weight: 600; }
+    .chart-label .chart-val { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .chart-label .chart-val strong { color: var(--text); }
+
+    svg.sparkline { display: block; width: 100%; height: 64px; overflow: visible; }
+    .chart-foot { font-size: 11px; color: var(--muted); margin-top: 8px; text-align: right; }
+
+    /* Right column – overview stats */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0; }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      cursor: pointer; transition: box-shadow .2s, transform .15s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .stat-card .stat-icon {
+      width: 30px; height: 30px;
+      background: var(--teal-light);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--teal);
+    }
+    .stat-card .stat-num { font-size: 22px; font-weight: 700; color: var(--text); }
+    .stat-card .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 500; line-height: 1.2; }
+    .badge {
+      position: absolute; top: 10px; right: 10px;
+      background: var(--orange); color: #fff;
+      font-size: 10px; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .stat-card.wide {
+      grid-column: 1 / -1;
+      flex-direction: row; align-items: center; justify-content: space-between;
+    }
+    .stat-card.wide .stat-text { display: flex; flex-direction: column; gap: 3px; }
+
+    .view-link { font-size: 12px; color: var(--teal); font-weight: 600; cursor: pointer; }
+    .view-link:hover { text-decoration: underline; }
+
+    /* Quick actions */
+    .quick-actions { display: flex; flex-direction: column; gap: 6px; }
+    .qa-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; color: var(--text);
+      background: var(--bg); cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .qa-item:hover { background: var(--teal-light); color: var(--teal); }
+    .qa-item svg { color: var(--teal); flex-shrink: 0; }
+
+    /* Latest activity */
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .activity-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--teal-light);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--teal); flex-shrink: 0; margin-top: 1px;
+    }
+    .activity-body { flex: 1; }
+    .activity-body p { font-size: 12px; font-weight: 500; color: var(--text); line-height: 1.4; }
+    .activity-body span { font-size: 11px; color: var(--muted); }
+    .activity-item .view-link { align-self: center; white-space: nowrap; }
+
+    /* Footer */
+    .footer {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 10px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; color: var(--muted);
+      grid-column: 1 / -1;
+    }
+    .footer a { color: var(--muted); text-decoration: none; margin-right: 16px; }
+    .footer a:hover { color: var(--teal); }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">M</div>
+      <div class="logo-text">
+        <strong>MediCare</strong>
+        <span>Clinic</span>
+      </div>
+    </div>
+
+    <nav>
+      <a class="nav-item active" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Appointments
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Messages
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        Records
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Billing
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a class="nav-item logout" href="#">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="avatar">S</div>
+      <div class="header-text">
+        <h1>Welcome back, Sarah Miller!</h1>
+        <p>Member ID: MC10234 <span>|</span> Joined 2021</p>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Left column -->
+      <div class="left-col">
+
+        <!-- Next Appointment -->
+        <div class="card appt-card">
+          <div class="section-title">Your Next Appointment</div>
+          <div class="appt-inner">
+            <div class="doctor-avatar">A</div>
+            <div>
+              <h3>Dr. Anya Sharma</h3>
+              <p>General Practitioner</p>
+            </div>
+          </div>
+          <div class="appt-time">Thursday, Oct 12 at 10:00 AM</div>
+          <div class="appt-location">Telehealth Call</div>
+          <div class="appt-actions">
+            <button class="btn-join">Join Meeting</button>
+            <button class="btn-reschedule">Reschedule</button>
+          </div>
+        </div>
+
+        <!-- Health Dashboard -->
+        <div class="card">
+          <div class="health-header">
+            <div class="section-title" style="margin:0">Health Dashboard</div>
+            <select class="time-select">
+              <option>Past Month ▾</option>
+              <option>Past Week</option>
+              <option>Past Year</option>
+            </select>
+          </div>
+          <div class="charts-grid">
+
+            <!-- Heart Rate -->
+            <div class="chart-box">
+              <div class="chart-label">
+                <span>Heart Rate</span>
+              </div>
+              <svg class="sparkline" viewBox="0 0 200 64" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="hrGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#0d9488" stop-opacity=".35"/>
+                    <stop offset="100%" stop-color="#0d9488" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,42 C10,42 12,10 20,24 C28,38 32,8 42,20 C52,32 54,48 64,38 C74,28 76,16 86,22 C96,28 98,50 108,40 C118,30 122,14 132,18 C142,22 146,44 156,36 C166,28 170,18 180,20 C190,22 196,30 200,28 L200,64 L0,64 Z"
+                      fill="url(#hrGrad)"/>
+                <path d="M0,42 C10,42 12,10 20,24 C28,38 32,8 42,20 C52,32 54,48 64,38 C74,28 76,16 86,22 C96,28 98,50 108,40 C118,30 122,14 132,18 C142,22 146,44 156,36 C166,28 170,18 180,20 C190,22 196,30 200,28"
+                      fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="chart-foot">Past Month</div>
+            </div>
+
+            <!-- BP -->
+            <div class="chart-box">
+              <div class="chart-label">
+                <span>Blood Pressure</span>
+                <span class="chart-val"><strong>118/76</strong> mmHg</span>
+              </div>
+              <svg class="sparkline" viewBox="0 0 200 64" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="bpGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#0d9488" stop-opacity=".25"/>
+                    <stop offset="100%" stop-color="#0d9488" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,48 C20,46 40,38 60,36 C80,34 100,32 120,30 C140,28 160,26 180,24 C190,23 196,22 200,22 L200,64 L0,64 Z"
+                      fill="url(#bpGrad)"/>
+                <path d="M0,48 C20,46 40,38 60,36 C80,34 100,32 120,30 C140,28 160,26 180,24 C190,23 196,22 200,22"
+                      fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="chart-foot">Oct 01 – Oct 31</div>
+            </div>
+
+            <!-- Blood Sugar -->
+            <div class="chart-box">
+              <div class="chart-label">
+                <span>Blood Sugar</span>
+                <span class="chart-val"><strong>7.4</strong> mmol/L</span>
+              </div>
+              <svg class="sparkline" viewBox="0 0 200 64" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="bsGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f97316" stop-opacity=".25"/>
+                    <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,38 C15,38 20,42 35,36 C50,30 60,44 80,40 C100,36 110,30 130,34 C150,38 160,42 180,36 C190,33 196,32 200,30 L200,64 L0,64 Z"
+                      fill="url(#bsGrad)"/>
+                <path d="M0,38 C15,38 20,42 35,36 C50,30 60,44 80,40 C100,36 110,30 130,34 C150,38 160,42 180,36 C190,33 196,32 200,30"
+                      fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="chart-foot">Oct 01 – Oct 31</div>
+            </div>
+
+            <!-- Weight placeholder -->
+            <div class="chart-box">
+              <div class="chart-label">
+                <span>Weight</span>
+                <span class="chart-val"><strong>62.4</strong> kg</span>
+              </div>
+              <svg class="sparkline" viewBox="0 0 200 64" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="wGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#5eead4" stop-opacity=".35"/>
+                    <stop offset="100%" stop-color="#5eead4" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,44 C20,43 40,46 60,42 C80,38 100,36 120,38 C140,40 160,37 180,35 C190,34 196,33 200,32 L200,64 L0,64 Z"
+                      fill="url(#wGrad)"/>
+                <path d="M0,44 C20,43 40,46 60,42 C80,38 100,36 120,38 C140,40 160,37 180,35 C190,34 196,33 200,32"
+                      fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <div class="chart-foot">Oct 01 – Oct 31</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Overview Stats -->
+        <div class="card" style="padding:18px 16px;">
+          <div class="section-title">Overview</div>
+          <div class="stat-grid">
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="stat-num">3</div>
+              <div class="stat-lbl">Active Appointments</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon" style="background:#fff7ed;color:#f97316;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div class="stat-num">1</div>
+              <div class="stat-lbl">New Messages</div>
+              <div class="badge">1</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <div class="stat-text">
+                <div class="stat-lbl" style="font-size:12px;font-weight:600;color:var(--text);">Recent Lab Results</div>
+              </div>
+              <div class="view-link">View</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+              </div>
+              <div class="stat-text">
+                <div class="stat-num" style="font-size:16px;">2 Refills</div>
+                <div class="stat-lbl">Prescriptions</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card" style="padding:18px 16px;">
+          <div class="section-title">Quick Actions</div>
+          <div class="quick-actions">
+            <div class="qa-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Schedule New Appointment
+            </div>
+            <div class="qa-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Message Doctor
+            </div>
+            <div class="qa-item">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Request Refill
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Activity -->
+        <div class="card" style="padding:18px 16px;">
+          <div class="section-title">Latest Activity</div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              </div>
+              <div class="activity-body">
+                <p>Dr. Sharma requested lab results</p>
+                <span>2 days ago</span>
+              </div>
+              <span class="view-link">View</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+              </div>
+              <div class="activity-body">
+                <p>Prescription refill ready</p>
+                <span>1 week ago</span>
+              </div>
+              <span class="view-link">View</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /right-col -->
+
+    </div><!-- /content -->
+
+    <!-- Footer -->
+    <div class="footer">
+      <div><a href="#">Privacy</a><a href="#">Help</a></div>
+      <div>© Copyright 2021 MediCare Clinic</div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
